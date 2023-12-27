@@ -1,8 +1,8 @@
 package workflows
 
 import (
-	"idempotence/activities"
-	"idempotence/inventory"
+	"ordermanagement/activities"
+	"ordermanagement/inventory"
 	"time"
 
 	"go.temporal.io/sdk/workflow"
@@ -19,6 +19,12 @@ func InventoryWorkflow(ctx workflow.Context, order inventory.Order) error {
 	}
 	ctx = workflow.WithActivityOptions(ctx, ao)
 
+	// 	-- process_order(order):
+	//-- check_fraud(order.order_id, order.payment_info)
+	//-- prepare_shipment(order)
+	//-- charge_confirm = charge(order.order_id, order.payment_info) // worker dies here
+	//-- shipment_confirmation = ship(order)
+
 	err := workflow.ExecuteActivity(ctx, activities.UpdateInventoryActivity, order).Get(ctx, nil)
 	if err != nil {
 		logger.Error("Activity failed.", "Error", err)
@@ -26,10 +32,6 @@ func InventoryWorkflow(ctx workflow.Context, order inventory.Order) error {
 	}
 
 	err = workflow.ExecuteActivity(ctx, activities.SupplierOrderActivity, order.Item, 1000).Get(ctx, nil)
-	if err != nil {
-		logger.Error("Activity failed.", "Error", err)
-		return err
-	}
 
 	logger.Info("InventoryWorkflow completed.")
 

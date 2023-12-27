@@ -1,37 +1,39 @@
 package main
 
 import (
-	"idempotence/activities"
-	"idempotence/workflows"
 	"log"
+	"ordermanagement/activities"
+	u "ordermanagement/utils"
+	"ordermanagement/workflows"
 	"os"
 
-	"github.com/joho/godotenv"
 	"go.temporal.io/sdk/client"
 	"go.temporal.io/sdk/worker"
 	"go.temporal.io/sdk/workflow"
 )
 
+var OrderManagementTransferTaskQueueName = os.Getenv("ORDER_MANAGEMENT_TASK_QUEUE")
+
 // main is the entry point of the program.
 // No parameters.
 // No return values.
 func main() {
-	err := godotenv.Load(".env")
+	log.Printf("%sGo worker starting.%s", u.ColorGreen, u.ColorReset)
+
+	// Load the Temporal Cloud from env
+	clientOptions, err := u.LoadClientOptions(u.SDKMetrics)
 	if err != nil {
-		log.Fatal("Error loading enrinoment variables file")
+		log.Fatalf("Failed to load Temporal Cloud environment: %v", err)
 	}
 
-	clientOptions := client.Options{
-		HostPort:  os.Getenv("TEMPORAL_HOST"),
-		Namespace: os.Getenv("TEMPORAL_NAMESPACE"),
-	}
+	log.Printf("%sGo worker connecting to server.%s", u.ColorGreen, u.ColorReset)
 	temporalClient, err := client.Dial(clientOptions)
 	if err != nil {
-		log.Fatal("Unable to create Temporal client", err)
+		log.Fatalln("Unable to create Temporal client", err)
 	}
 	defer temporalClient.Close()
 
-	temporalWorker := worker.New(temporalClient, os.Getenv("TASKQUEUE"), worker.Options{})
+	temporalWorker := worker.New(temporalClient, OrderManagementTransferTaskQueueName, worker.Options{})
 
 	RegisterWFOptions := workflow.RegisterOptions{
 		Name: "InventoryTask",

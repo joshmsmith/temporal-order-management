@@ -3,8 +3,8 @@ package activities
 import (
 	"context"
 	"errors"
-	"idempotence/inventory"
-	"idempotence/tools"
+	"ordermanagement/inventory"
+	"ordermanagement/utils"
 
 	"go.temporal.io/sdk/activity"
 )
@@ -28,14 +28,16 @@ func UpdateInventoryActivity(ctx context.Context, order inventory.Order) error {
 		return err
 	}
 
-	if tools.IsError() {
+	//TODO make these random errors more better fake errors
+	if utils.IsError() {
 		return errors.New("RANDOM ERROR")
 	}
 	err = inventory.UpdateStock(order.OrderID, order.Item, inStock-order.Quantity)
 	if err != nil {
 		return err
 	}
-	if tools.IsError() {
+	if utils.IsError() {
+		//TODO make these random errors more better fake errors
 		return errors.New("RANDOM ERROR")
 	}
 	return nil

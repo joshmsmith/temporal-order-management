@@ -3,8 +3,8 @@ package activities
 import (
 	"context"
 	"errors"
-	"idempotence/inventory"
-	"idempotence/tools"
+	"ordermanagement/inventory"
+	"ordermanagement/utils"
 
 	"go.temporal.io/sdk/activity"
 )
@@ -21,12 +21,14 @@ func SupplierOrderActivity(ctx context.Context, item string, quantity int) error
 	if err != nil {
 		return err
 	}
-	if tools.IsError() {
+	//TODO make these random errors more better fake errors
+	if utils.IsError() {
 		return errors.New("RANDOM ERROR")
 	}
 	if inStock < 10 {
 		// Call supplier API and update inventory
-		if tools.IsError() {
+		if utils.IsError() {
+			//TODO make these random errors more better fake errors
 			return errors.New("RANDOM ERROR")
 		}
 		inventory.SupplierOrder(quantity)
