@@ -1,6 +1,6 @@
 # idempotence
 
-This project demonstrates how to manage idempotence in a Temporal.io project. Check out the full blog post here: []
+This project demonstrates how to manage idempotence in a Temporal.io project. Check out the full blog post here: [Idempotence in Temporal.io, a Look into Technical Architectures](https://medium.com/@ps.augereau/idempotence-in-temporal-io-a-look-into-technical-architectures-11d20a0fc860)
 
 When a customer orders a product, the inventory is decrease and if the stock is below 2 and order to the supplier is made and the stock is incremented.
  
