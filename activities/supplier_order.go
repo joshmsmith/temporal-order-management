@@ -3,8 +3,8 @@ package activities
 import (
 	"context"
 	"errors"
-	"idempotence/inventory"
-	"idempotence/tools"
+	"ordermanagement/inventory"
+	"ordermanagement/utils"
 
 	"go.temporal.io/sdk/activity"
 )
@@ -21,13 +21,17 @@ func SupplierOrderActivity(ctx context.Context, item string, quantity int) error
 	if err != nil {
 		return err
 	}
-	if tools.IsError() {
-		return errors.New("RANDOM ERROR")
+
+	if utils.IsError() {
+		return errors.New("RANDOM ERROR CHECKING STOCK FOR RE-ORDER")
 	}
-	if inStock < 10 {
+	logger.Info("SupplierOrderActivity: Stock Level for", item, "is at:", inStock)
+	if inStock < 5000 {
 		// Call supplier API and update inventory
-		if tools.IsError() {
-			return errors.New("RANDOM ERROR")
+		logger.Info("SupplierOrderActivity: Stock Level less than minimum required, re-ordering up to", quantity)
+		if utils.IsError() {
+
+			return errors.New("RANDOM ERROR TELLING SUPPLIER TO SEND US MORE STUFF")
 		}
 		inventory.SupplierOrder(quantity)
 		return nil

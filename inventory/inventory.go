@@ -46,6 +46,7 @@ func ReadJSON(filename string) (Inventory, error) {
 // Returns:
 // - bool: true if the order is found, false otherwise.
 func SearchOrder(orderID string) bool {
+
 	data, err := ReadJSON(os.Getenv("DATABASE"))
 	if err != nil {
 		fmt.Println("Error reading JSON:", err)
@@ -63,6 +64,7 @@ func SearchOrder(orderID string) bool {
 // It takes a string parameter, productID, which represents the unique identifier of the product.
 // The function returns an integer value representing the quantity of the product that is currently in stock.
 func GetInStock(productID string) (int, error) {
+
 	data, err := ReadJSON(os.Getenv("DATABASE"))
 	if err != nil {
 		fmt.Println("Error reading JSON:", err)
@@ -83,6 +85,7 @@ func GetInStock(productID string) (int, error) {
 //
 // Return type: error.
 func UpdateStock(orderID string, productID string, inStock int) error {
+
 	data, err := ReadJSON(os.Getenv("DATABASE"))
 	if err != nil {
 		fmt.Println("Error reading JSON:", err)
@@ -117,13 +120,19 @@ func UpdateJSON(filename string, data Inventory) error {
 }
 
 func SupplierOrder(quantity int) error {
+
 	data, err := ReadJSON(os.Getenv("DATABASE"))
 	if err != nil {
 		fmt.Println("Error reading JSON:", err)
 		return err
 	}
 	GetInStock(data.ProductID)
-	data.InStock = data.InStock + quantity
+	// how much should we order?
+	toOrder := quantity - data.InStock
+
+	// order that much
+	fmt.Println("Ordering from supplier: ", toOrder)
+	data.InStock = data.InStock + toOrder
 	UpdateJSON(os.Getenv("DATABASE"), data)
 	return nil
 }
