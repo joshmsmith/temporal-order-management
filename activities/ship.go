@@ -19,9 +19,9 @@ func Ship(ctx context.Context, order inventory.Order) (string, error) {
 	logger := activity.GetLogger(ctx)
 	logger.Info("Ship Activity started")
 
-	// simulate a random error
+	// pretend to request the warehouse ship the order
 	if utils.IsError() {
-		return "", errors.New("RANDOM CONFIRMING SHIPMENT ERROR: FELL OUT OF THE TRUCK")
+		return "", errors.New("RANDOM CONFIRMING SHIPMENT ERROR: WAREHOUSE AUTOMATION SYSTEM DOWN")
 	}
 
 	return "CONFIRMED", nil

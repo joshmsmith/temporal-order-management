@@ -18,7 +18,7 @@ func CheckFraud(ctx context.Context, orderID string, paymentInfo string) error {
 	logger := activity.GetLogger(ctx)
 	logger.Info("CheckFraud Activity started")
 
-	// simulate a random error
+	// pretend to check for fraud, sometimes error
 	if utils.IsError() {
 		return errors.New("RANDOM ERROR CHECKING FRAUD ACTIVITY: THESE GUYS ARE PIRATES")
 	}

@@ -79,7 +79,7 @@ func main() {
 
 	// Execute workflow
 	log.Println(order.OrderID, "- Starting Order Management System workflow on", OrderManagementTransferTaskQueueName, "task queue")
-	workflowExec, err := temporalClient.ExecuteWorkflow(context.Background(), workflowOptions, workflows.InventoryWorkflow, order)
+	workflowExec, err := temporalClient.ExecuteWorkflow(context.Background(), workflowOptions, workflows.ProcessOrder, order)
 	if err != nil {
 
 		log.Fatalln(order.OrderID, "- %sError, Unable to execute workflow %v:%s", u.ColorRed, err, u.ColorReset)

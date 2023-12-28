@@ -38,10 +38,10 @@ func main() {
 	RegisterWFOptions := workflow.RegisterOptions{
 		Name: "InventoryTask",
 	}
-	temporalWorker.RegisterWorkflowWithOptions(workflows.InventoryWorkflow, RegisterWFOptions)
+	temporalWorker.RegisterWorkflowWithOptions(workflows.ProcessOrder, RegisterWFOptions)
 
 	// activities for demo from pitch
-	temporalWorker.RegisterActivity(activities.ChargeConfirm)
+	temporalWorker.RegisterActivity(activities.Charge)
 	temporalWorker.RegisterActivity(activities.CheckFraud)
 	temporalWorker.RegisterActivity(activities.PrepareShipment)
 	temporalWorker.RegisterActivity(activities.Ship)

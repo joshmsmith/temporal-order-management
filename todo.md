@@ -1,9 +1,9 @@
 ### list o'things to do
 ```
-[ ] update readme
+[x] update readme
+[x] update demo scripts and docs
+[x] pretty pictures
 
 [ ] add more tests
-
-
 
 ```

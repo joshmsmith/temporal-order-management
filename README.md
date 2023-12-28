@@ -1,22 +1,54 @@
-# idempotence
+# Temporal Order Management Demo
+This is a simple demo in Go that implements an order management system  in [Temporal](https://temporal.io/).
 
-This project demonstrates how to manage idempotence in a Temporal.io project. Check out the full blog post here: [Idempotence in Temporal.io, a Look into Technical Architectures](https://medium.com/@ps.augereau/idempotence-in-temporal-io-a-look-into-technical-architectures-11d20a0fc860)
+Here is our sample order process pseudocode:
 
-When a customer orders a product, the inventory is decrease and if the stock is below 2 and order to the supplier is made and the stock is incremented.
+![pitchcode](./resources/pitchcode.png)
+
+
+This demo app demonstrates the [durability](https://temporal.io/how-it-works) of a process implemented in Temporal:
+1. Crashing the process doesn't kill it. Upon resume it picks up right where it left off.
+2. Errors are recovered without thought or work
+3. At-Least-Once execution: activities succeed at least once per the workflow
+
+Optionally, it can demonstrate how to [manage idempotence](./idempotence.md) in Temporal.
+
+These capabilities are **great to develop with** and **change the way I think about doing development.** 
+
+As a developer I can **focus** just on what I want to do, and Temporal manages what happens when things don't work out. 
+
+While working on this project, I created **many** bugs in my activities, and all I had to do to fix my in-flight orders was fix the code bugs and restart the worker process. The  errors went away and none of the workflows failed, they all succeeded.
+
+*Zero workflow processes failed in the building of this demo*.
+
+![durable_execution](./resources/durable_execution_abstraction_small.png)
+
+## Process Order Concept
+When a customer orders a product, the order is validated per the steps above.
  
-This project utilises a workflow named **"Inventory Workflow"**, and this workflow invokes two activities:
+This project utilises a workflow named **"Process Order"**, and this workflow invokes four activities:
 
- 1. UpdateInventoryActivity. The inventory is updated with the decreasing quantity.
- 2. Supplier Order. If the stock for the product drops below 2, an order is placed with the supplier and the stock is updated.
+ 1. [Check for Fraud](./activities/check_fraud.go): validates that the payment info isn't fraudulent 
+ 2. [Prepare Shipment](./activities/prepare_shipment.go): validate there's enough stock and that the order isn't a duplicate
+ 3. [Charge](./activities/charge.go): charge for the order
+ 4. [Ship](./activities/ship.go): ship the order
+ 
+ There is an extra step added to make sure there's enough inventory after the order:
 
-**Idempotence** ensures that when a workflow or an activity is retried by Temporal (due to an error for example), the system remains unchanged. This means:
- - Updating the inventory with the same orderID results in no change.
- - If an order has already been sent to the supplier, no additional orders are sent.
+ 5. [Supplier Order](./activities/supplier_order.go). If the stock for the product drops below the minimum (5,000), an [order is placed with the supplier](./inventory/inventory.go) and the stock is updated.
 
-**All this rules have to be managed by the developer.**
+These error-prone [Activities](https://docs.temporal.io/activities) are included in a [Workflow](https://docs.temporal.io/workflows) and executed in a [Worker](https://docs.temporal.io/workers), conneced with the [Temporal SDK](https://docs.temporal.io/dev-guide):
 
-The activities introduce random errors (this is for testing Temporal's retry capabilities and idempotency)
-The code in `starter.go`` demonstrates the workflow. Initially, product 123456 has 1000 units. A customer orders 999 units, and the supplier credits 1000 units. Therefore, the final stock for product 123456 is 1001 units.
+![how_does_it_work](./resources/workflows_activities_steps.png)
+
+The activities have random errors, just like real production applications. No matter the activity errors or worker crashes, Temporal ensures your application process completes as specified in the workflow. See the [demos](./demos.md) for ways to demonstrate and validate Temporal's retry capabilities and idempotency. 
+
+![durable_execution](./resources/temporal_app_and_temporal_service.png)
+
+
+
+## Process Results
+The code in [starter](./starter/main.go) demonstrates the workflow. Initially, product 123456 has 1000 units. In the default behavior, a customer orders 999 units, and the supplier is requested to [deliver supply up to the minimum.](./inventory/inventory.go) After an order processes, you can see its results.
 
 At the beginning, the database looks like this:
 
@@ -28,95 +60,42 @@ At the beginning, the database looks like this:
 }
 ```
 
+As the order processes, the database looks like this:
+```json
+{
+    "orderID": "A123",
+    "productID": "123456",
+    "inStock": 1
+}
+```
+
 At the end the database looks like this:
 
 ```json
 {
     "orderID": "A12",
     "productID": "123456",
-    "inStock": 1001
+    "inStock": 10000
 }
 ```
+The inventory was reduced by the order quantity of 999 and then set back up to the requested capacity.
 
-
-# Setup
-You need to have a Temporal server up and running.
-
-CLone the repo :
-```shell
-git clone git@github.com:PierreSylvain/idempotence.git
-```
-
-alternate demo:
-start worker:
-go run workers/main.go
-
-new terminal:
-chmod +x ./demoscripts/*
-cd ./demoscripts/
-idempotencydemo.sh
-## Temporal Cloud configuration
-This example assumes that you have a temporal cloud configured and have local client certificate files for your namespace.
-The values are passed into the demo app using environment variables, example direnv .envrc file is included in the repo:
-
-```
-# direnv .envrc
-
-# Temporal Cloud connection
-# region: us-east-1
-export TEMPORAL_HOST_URL="myns.abcdf.tmprl.cloud:7233"
-export TEMPORAL_NAMESPACE="myns.abcdf"
-
-# tclient-myns client cert
-export TEMPORAL_TLS_CERT="/Users/myuser/.temporal/tclient-myns.pem"
-export TEMPORAL_TLS_KEY="/Users/myuser/.temporal/tclient-myns.key"
-
-# Optional: path to root server CA cert
-export TEMPORAL_SERVER_ROOT_CA_CERT=
-# Optional: Server name to use for verifying the server's certificate
-export TEMPORAL_SERVER_NAME=
-
-export TEMPORAL_INSECURE_SKIP_VERIFY=false
-
-# App temporal taskqueue name for moneytransfer
-export TRANSFER_MONEY_TASK_QUEUE="go-moneytransfer"
-# timer for transfer table to be checked (seconds)
-export CHECK_TRANSFER_TASKQUEUE_TIMER=20
-
-# payload data encryption
-export ENCRYPT_PAYLOAD=false
-export DATACONVERTER_ENCRYPTION_KEY_ID=mysecretkey
-
-# Set to enable debug logger logging
-export LOG_LEVEL=debug
-
-# local mysql backend db connection
-export MYSQL_HOST=localhost
-export MYSQL_DATABASE=dataentry
-export MYSQL_USER=mysqluser
-export MYSQL_PASSWORD=mysqlpw
-```
-
-Copy the .env-dist file into .env and change the values as needed :
-
-```shell
-TEMPORAL_URL=localhost:7233
-TEMPORAL_NAMESPACE=default
-TASKQUEUE=inventory-task-queue
-DATABASE=database/inventory.json
-```
-
-The `DATABASE` parameter in the name where to store the data.
-
-Then start the worker :
+# Getting Started
+See [Setup Instructions](./setup.md).
+### First Demo
+After the setup is done, you can do the  basic demo described in the [setup instructions](./setup.md). 
+You can see an order get processed, maybe fail randomly.
+1. Start the worker :
 ```shell
 go run workers/main.go
 ```
 
-And finally, test with :
+2. Test with :
 ```shell 
 go run starter/main.go
 ```
 
-
-
+# Next Steps
+1. Check out the ways to [demonstrate that this works nicely](./demos.md)
+2. Play around with the code in new ways, try to break Temporal, maybe try some [retry policies](https://docs.temporal.io/retry-policies#:~:text=A%20Retry%20Policy%20works%20in,or%20an%20Activity%20Task%20Execution.) 
+3. Feel free to fork and contribute!
