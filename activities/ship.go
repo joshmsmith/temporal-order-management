@@ -23,6 +23,7 @@ func Ship(ctx context.Context, order inventory.Order) (string, error) {
 	if utils.IsError() {
 		return "", errors.New("RANDOM CONFIRMING SHIPMENT ERROR: WAREHOUSE AUTOMATION SYSTEM DOWN")
 	}
+	logger.Info("Shipment request successful for", order.OrderID, "- shipping", order.Quantity, "of item #", order.Item, "to requestor!")
 
 	return "CONFIRMED", nil
 }
