@@ -6,6 +6,7 @@ require (
 	github.com/gogo/protobuf v1.3.2
 	github.com/gorilla/mux v1.8.1
 	github.com/prometheus/client_golang v1.17.0
+	github.com/stretchr/testify v1.8.3
 	github.com/uber-go/tally/v4 v4.1.10
 	go.temporal.io/api v1.21.0
 	go.temporal.io/sdk v1.24.0
@@ -32,7 +33,6 @@ require (
 	github.com/prometheus/procfs v0.11.1 // indirect
 	github.com/robfig/cron v1.2.0 // indirect
 	github.com/stretchr/objx v0.5.0 // indirect
-	github.com/stretchr/testify v1.8.3 // indirect
 	github.com/twmb/murmur3 v1.1.5 // indirect
 	go.uber.org/atomic v1.9.0 // indirect
 	golang.org/x/net v0.10.0 // indirect

@@ -9,6 +9,7 @@
 [ ] update readme
 [x] remove env-dist
 [x] idempotency
+[ ] add more tests
 
 
 

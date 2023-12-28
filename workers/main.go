@@ -40,14 +40,13 @@ func main() {
 	}
 	temporalWorker.RegisterWorkflowWithOptions(workflows.InventoryWorkflow, RegisterWFOptions)
 
-	temporalWorker.RegisterActivity(activities.ProcessOrder)
+	// activities for demo from pitch
 	temporalWorker.RegisterActivity(activities.ChargeConfirm)
 	temporalWorker.RegisterActivity(activities.CheckFraud)
 	temporalWorker.RegisterActivity(activities.PrepareShipment)
 	temporalWorker.RegisterActivity(activities.Ship)
 
-	//ye olde activitiees
-	temporalWorker.RegisterActivity(activities.UpdateInventoryActivity)
+	// bonus activity
 	temporalWorker.RegisterActivity(activities.SupplierOrderActivity)
 
 	// Start listening to the task queue.
