@@ -40,6 +40,13 @@ func main() {
 	}
 	temporalWorker.RegisterWorkflowWithOptions(workflows.InventoryWorkflow, RegisterWFOptions)
 
+	temporalWorker.RegisterActivity(activities.ProcessOrder)
+	temporalWorker.RegisterActivity(activities.ChargeConfirm)
+	temporalWorker.RegisterActivity(activities.CheckFraud)
+	temporalWorker.RegisterActivity(activities.PrepareShipment)
+	temporalWorker.RegisterActivity(activities.Ship)
+
+	//ye olde activitiees
 	temporalWorker.RegisterActivity(activities.UpdateInventoryActivity)
 	temporalWorker.RegisterActivity(activities.SupplierOrderActivity)
 

@@ -27,6 +27,7 @@ func main() {
 		OrderID:  fmt.Sprintf("order-%d", rand.Intn(99999)),
 		Item:     "123456",
 		Quantity: 999,
+		PaymentInfo: "VISA-12345",
 	}
 
 	log.Print(order.OrderID, "- called, Order Details: ", order)

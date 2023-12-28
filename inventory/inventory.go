@@ -127,7 +127,12 @@ func SupplierOrder(quantity int) error {
 		return err
 	}
 	GetInStock(data.ProductID)
-	data.InStock = data.InStock + quantity
+	// how much should we order?
+	toOrder := quantity - data.InStock
+
+	// order that much
+	fmt.Println("Ordering from supplier: ", toOrder)
+	data.InStock = data.InStock + toOrder
 	UpdateJSON(os.Getenv("DATABASE"), data)
 	return nil
 }

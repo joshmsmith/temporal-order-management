@@ -21,15 +21,17 @@ func SupplierOrderActivity(ctx context.Context, item string, quantity int) error
 	if err != nil {
 		return err
 	}
-	//TODO make these random errors more better fake errors
+
 	if utils.IsError() {
-		return errors.New("RANDOM ERROR")
+		return errors.New("RANDOM ERROR CHECKING STOCK FOR RE-ORDER")
 	}
-	if inStock < 10 {
+	logger.Info("SupplierOrderActivity: Stock Level for", item, "is at:", inStock)
+	if inStock < 5000 {
 		// Call supplier API and update inventory
+		logger.Info("SupplierOrderActivity: Stock Level less than minimum required, re-ordering up to", quantity)
 		if utils.IsError() {
-			//TODO make these random errors more better fake errors
-			return errors.New("RANDOM ERROR")
+
+			return errors.New("RANDOM ERROR TELLING SUPPLIER TO SEND US MORE STUFF")
 		}
 		inventory.SupplierOrder(quantity)
 		return nil

@@ -1,6 +1,14 @@
 ### list o'things to do
-[x] get it working
+```
 [x] change a bunch for logging and such
+[x] get it working
+[x] push updates
+[ ] make the activities be right
 [ ] update errors to not be random
 [ ] fix logging to be prettier
-[ ] make the activities be right
+[ ] update readme
+[ ] remove env-dist
+
+
+
+```
