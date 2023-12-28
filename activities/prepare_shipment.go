@@ -16,9 +16,9 @@ import (
  *   2. updates the inventory (stock) based on the given order and writes the order as existing
  *
  * Takes a context.Context and an inventory.Order as parameters.
- * Returns an error.
+ * Returns an indicator if there is a duplicate oder and an error.
  */
-func PrepareShipment(ctx context.Context, order inventory.Order) error {
+func PrepareShipment(ctx context.Context, order inventory.Order) (bool, error) {
 	logger := activity.GetLogger(ctx)
 	logger.Info("PrepareShipment Activity started")
 
@@ -26,27 +26,27 @@ func PrepareShipment(ctx context.Context, order inventory.Order) error {
 	orderExists := inventory.SearchOrder(order.OrderID)
 	if orderExists {
 		logger.Info("Order Exists!")
-		return nil // nothing to do
+		return true, nil // nothing to do
 	}
 
 	inStock, err := inventory.GetInStock(order.Item)
 	if err != nil {
-		return err
+		return false, err
 	}
 
 	if inStock < order.Quantity {
-		return errors.New("NOT ENOUGH STOCK")
+		return false, errors.New("NOT ENOUGH STOCK")
 	}
 
 	// simulate a random error
 	if utils.IsError() {
-		return errors.New("RANDOM ERROR PREPARING SHIPMENT: WAREHOUSE CAUGHT ON FIRE AND ALL THE BOXES BURNT UP")
+		return false, errors.New("RANDOM ERROR PREPARING SHIPMENT: WAREHOUSE CAUGHT ON FIRE AND ALL THE BOXES BURNT UP")
 	}
 
 	err = inventory.UpdateStock(order.OrderID, order.Item, inStock-order.Quantity)
 	if err != nil {
-		return err
+		return false, err
 	}
 
-	return nil
+	return false, nil
 }

@@ -12,39 +12,43 @@ import (
 
 // InventoryWorkflow is a function that handles the inventory workflow.
 // It takes a workflow context as input and returns an error if any.
-func InventoryWorkflow(ctx workflow.Context, order inventory.Order) error {
+func InventoryWorkflow(ctx workflow.Context, order inventory.Order) (string, error) {
 	logger := workflow.GetLogger(ctx)
-	logger.Info("InventoryWorkflow")
+	logger.Info(order.OrderID, " - Starting InventoryWorkflow, Order Details: ", order)
 
 	ao := workflow.ActivityOptions{
 		StartToCloseTimeout: 10 * time.Second,
 	}
 	ctx = workflow.WithActivityOptions(ctx, ao)
 
-	// 	-- process_order(order):
-	err := workflow.ExecuteActivity(ctx, activities.ProcessOrder, order).Get(ctx, nil)
-	if err != nil {
-		logger.Error("ProcessOrder activity failed.", "Error", err)
-		return err
-	}
 	//-- check_fraud(order.order_id, order.payment_info)
-	err = workflow.ExecuteActivity(ctx, activities.CheckFraud, order.OrderID, order.PaymentInfo).Get(ctx, nil)
+	err := workflow.ExecuteActivity(ctx, activities.CheckFraud, order.OrderID, order.PaymentInfo).Get(ctx, nil)
 	if err != nil {
 		logger.Error("CheckFraud activity failed.", "Error", err)
-		return err
+		return "", err
 	}
+
+	// 	-- process_order(order):
+	duplicate := false
+
+
 	//-- prepare_shipment(order)
-	err = workflow.ExecuteActivity(ctx, activities.PrepareShipment, order).Get(ctx, nil)
+	err = workflow.ExecuteActivity(ctx, activities.PrepareShipment, order).Get(ctx, &duplicate)
 	if err != nil {
 		logger.Error("PrepareShipment activity failed.", "Error", err)
-		return err
+		return "", err
 	}
+
+	if duplicate {
+		return "Duplicate order", nil
+	}
+
 	//-- charge_confirm = charge(order.order_id, order.payment_info) // worker dies here
 	chargeConfirm := "UNCONFIRMED"
 	err = workflow.ExecuteActivity(ctx, activities.ChargeConfirm, order.OrderID, order.PaymentInfo).Get(ctx, &chargeConfirm)
 	if err != nil {
 		logger.Error("ChargeConfirm activity failed.", "Error", err)
-		return err
+		return "", err
 	}
 
 	// For demo - sleep between activities so you can kill the worker
@@ -58,7 +62,7 @@ func InventoryWorkflow(ctx workflow.Context, order inventory.Order) error {
 	err = workflow.ExecuteActivity(ctx, activities.Ship, order).Get(ctx, &shipmentConfirmation)
 	if err != nil {
 		logger.Error("ChargeConfirm activity failed.", "Error", err)
-		return err
+		return "", err
 	}
 
 	//bonus: order more stuff if needed
@@ -66,6 +70,6 @@ func InventoryWorkflow(ctx workflow.Context, order inventory.Order) error {
 
 	logger.Info("InventoryWorkflow completed. Charge Status:", chargeConfirm, ", Shipment Status: ", shipmentConfirmation, ".")
 
-	return nil
+	return "Order Managed", nil
 
 }

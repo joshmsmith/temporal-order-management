@@ -16,9 +16,9 @@ import (
  *   2. updates the inventory (stock) based on the given order and writes the order as existing
  *
  * Takes a context.Context and an inventory.Order as parameters.
- * Returns an error.
+ * Returns an indicator if there is a duplicate oder and an error.
  */
-func ProcessOrder(ctx context.Context, order inventory.Order) error {
+func ProcessOrder(ctx context.Context, order inventory.Order) (bool, error) {
 	logger := activity.GetLogger(ctx)
 	logger.Info("ProcessOrder started")
 
@@ -26,30 +26,30 @@ func ProcessOrder(ctx context.Context, order inventory.Order) error {
 	orderExists := inventory.SearchOrder(order.OrderID)
 	if orderExists {
 		logger.Info("ProcessOrder: Order", order.OrderID, "Exists!")
-		return nil // nothing to do
+		return true, nil // nothing to do
 	}
 
 	inStock, err := inventory.GetInStock(order.Item)
 	if err != nil {
 		logger.Error("ProcessOrder: checking stock failed", "Error", err)
-		return err
+		return false, err
 	}
 
 	if inStock < order.Quantity {
 		logger.Error("ProcessOrder: not enough stock", "Error", err)
-		return errors.New("NOT ENOUGH STOCK")
+		return false, errors.New("NOT ENOUGH STOCK")
 	}
 
 	// simulate a random error
 	if utils.IsError() {
 		logger.Error("ProcessOrder: checking stock failed for random reason", "Error", err)
-		return errors.New("ERROR CHECKING STOCK")
+		return false, errors.New("ERROR CHECKING STOCK")
 	}
 
 	err = inventory.UpdateStock(order.OrderID, order.Item, inStock-order.Quantity)
 	if err != nil {
-		return err
+		return false, err
 	}
 
-	return nil
+	return false, nil
 }

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"ordermanagement/inventory"
 	"ordermanagement/workflows"
+	"strconv"
 
 	"log"
 	"os"
@@ -19,25 +20,45 @@ import (
 
 var OrderManagementTransferTaskQueueName = os.Getenv("ORDER_MANAGEMENT_TASK_QUEUE")
 
-// entry point - set up and start the workflow process with a default order setup and random order number
+/* main
+ * entry point - set up and start the workflow process with a default order setup and random order number
+ * optional command line arguments:
+ *   order number: int
+ *   product number: int (only 123456 is supported)
+ *   quantity to order: int
+ *   payment info: string
+ */
 func main() {
 
 	// Set order values
 	order := inventory.Order{
-		OrderID:  fmt.Sprintf("order-%d", rand.Intn(99999)),
-		Item:     "123456",
-		Quantity: 999,
+		OrderID:     fmt.Sprintf("order-%d", rand.Intn(99999)),
+		Item:        "123456",
+		Quantity:    999,
 		PaymentInfo: "VISA-12345",
 	}
 
-	log.Print(order.OrderID, "- called, Order Details: ", order)
+	// collect command line args if valid
+	args := os.Args[1:]
+	if len(args) >= 4 {
+		if i, err := strconv.Atoi(args[2]); err == nil {
+			order = inventory.Order{
+				OrderID:     fmt.Sprintf("order-%s", args[0]),
+				Item:        args[1],
+				Quantity:    i,
+				PaymentInfo: args[3],
+			}
+		}
+	}
+
+	log.Print(order.OrderID, " - called, Order Details: ", order)
 
 	// Load the Temporal Cloud from env
 	clientOptions, err := u.LoadClientOptions(u.NoSDKMetrics)
 	if err != nil {
 		log.Fatalf(order.OrderID, "- Failed to load Temporal Cloud environment: %v", err)
 	}
-	log.Print(order.OrderID, "- connecting to Temporal server.")
+	log.Print(order.OrderID, " - connecting to Temporal server.")
 	temporalClient, err := client.Dial(clientOptions)
 	if err != nil {
 		log.Fatalln(order.OrderID, "- Unable to create Temporal client: %v", err)
@@ -71,10 +92,12 @@ func main() {
 
 	if errWF != nil {
 		log.Fatalln(order.OrderID, "- %sWorkflow returned failure:%s %v", u.ColorRed, u.ColorReset, errWF)
+	} else {
+		log.Printf("%s - %sWorkflow completed:%s WorkflowID: %s, RunID: %s, Result: %s", order.OrderID, u.ColorGreen, u.ColorReset, workflowExec.GetID(), workflowExec.GetRunID(), result)
 	}
 
 	// Get product stock
 	inStock, err = inventory.GetInStock(order.Item)
-	fmt.Printf("%s - %sUpdated Product %s stock: %d %s \n", order.OrderID, u.ColorGreen, order.Item, inStock, u.ColorReset)
+	log.Printf("%s - Current Product %s stock: %d \n", order.OrderID, order.Item, inStock)
 
 }

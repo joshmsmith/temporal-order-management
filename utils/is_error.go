@@ -3,7 +3,8 @@ package utils
 import "math/rand"
 
 func IsError() bool {
-	if rand.Intn(100)%3 == 0 {
+	// throw errors 1 time out of 100
+	if rand.Intn(100) > 99 {
 		return true
 	}
 	return false
