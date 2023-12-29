@@ -11,7 +11,7 @@ This demo app demonstrates the [durability](https://temporal.io/how-it-works) of
 2. Errors are recovered without thought or work
 3. At-Least-Once execution: activities succeed at least once per the workflow
 
-Optionally, it can demonstrate how to [manage idempotence](./demos.md##duplicate-order-idempotence) in Temporal.
+Optionally, it can demonstrate how to [manage idempotence](./demos.md#duplicate-order-idempotence) in Temporal.
 
 These capabilities are **great to develop with** and **change the way I think about doing development.** 
 
