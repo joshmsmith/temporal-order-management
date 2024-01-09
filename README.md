@@ -103,3 +103,9 @@ go run starter/main.go
 1. Check out the ways to [demonstrate that this works nicely](./demos.md)
 2. Play around with the code in new ways, try to break Temporal, maybe try some [retry policies](https://docs.temporal.io/retry-policies#:~:text=A%20Retry%20Policy%20works%20in,or%20an%20Activity%20Task%20Execution.) 
 3. Feel free to fork and contribute!
+
+## For Fun - Without Temporal
+If you want to play with the same error rates as the original but without Temporal Durable Execution-
+```shell 
+go run without_temporal/without_temporal.go
+```
