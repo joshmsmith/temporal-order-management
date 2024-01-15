@@ -34,7 +34,7 @@ func main() {
 	order := inventory.Order{
 		OrderID:     fmt.Sprintf("order-%d", rand.Intn(99999)),
 		Item:        "123456",
-		Quantity:    999,
+		Quantity:    13,
 		PaymentInfo: "VISA-12345",
 	}
 

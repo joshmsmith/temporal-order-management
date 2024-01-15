@@ -68,7 +68,7 @@ func ProcessOrder(ctx workflow.Context, order inventory.Order) (string, error) {
 	}
 
 	//bonus activity: order more stuff if needed
-	err = workflow.ExecuteActivity(ctx, activities.SupplierOrderActivity, order.Item, 10000).Get(ctx, nil)
+	//err = workflow.ExecuteActivity(ctx, activities.SupplierOrderActivity, order.Item, 10000).Get(ctx, nil)
 
 	logger.Info("ProcessOrder completed. Charge Status:", Charge, ", Shipment Status:", shipmentConfirmation, ".")
 

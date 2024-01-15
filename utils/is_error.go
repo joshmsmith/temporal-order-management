@@ -4,7 +4,7 @@ import "math/rand"
 
 func IsError() bool {
 	// throw errors sometimes- set it to how you want
-	if rand.Intn(100) > 90 {
+	if rand.Intn(100) > 80 {
 		return true
 	}
 	return false

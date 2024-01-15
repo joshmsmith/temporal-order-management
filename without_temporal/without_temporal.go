@@ -29,7 +29,7 @@ func main() {
 	order := inventory.Order{
 		OrderID:     fmt.Sprintf("order-%d", rand.Intn(99999)),
 		Item:        "123456",
-		Quantity:    999,
+		Quantity:    13,
 		PaymentInfo: "VISA-12345",
 	}
 
@@ -112,6 +112,10 @@ func ProcessOrder(order inventory.Order) (string, error) {
 		log.Println("Shipment process failed.", "Error", err)
 		return "", err
 	}
+
+	//bonus process : order more stuff if needed
+	//err = SupplierOrder(order.Item, 10000)
+
 
 	log.Println("ProcessOrder completed. Charge Status:", charge, ", Shipment Status:", shipmentConfirmation, ".")
 

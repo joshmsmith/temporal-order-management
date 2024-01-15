@@ -19,31 +19,31 @@ These capabilities are **great to develop with** and **change the way I think ab
 
 As a developer I can **focus** just on what I want to do, and Temporal manages what happens when things don't work out. 
 
-While working on this project, I created **many** bugs in my activities, and all I had to do to fix my in-flight orders was fix the code bugs and restart the worker process. The  errors went away and none of the workflows failed, they all succeeded.
+While working on this project, I created **many** bugs in my activities. All I had to do to fix my in-flight orders was fix the code bugs and restart the worker process. The  errors went away and none of the workflows failed, they all succeeded.
 
 *Zero workflow processes failed in the building of this demo*.
 
 
 
 ## Process Order Concept
-When a customer orders a product, the order is managed by executing the below steps, managed by Temporal.
+When a customer orders a product, the order is managed by executing the below steps. Temporal orchestrates the process.
  
-This project utilises a workflow named [**"Process Order"**](./workflows/process_order.go), and this workflow invokes four activities:
+This project utilizes a workflow named [**"Process Order"**](./workflows/process_order.go). The workflow invokes four activities:
 
  1. [Check for Fraud](./activities/check_fraud.go): validates that the payment info isn't fraudulent 
- 2. [Prepare Shipment](./activities/prepare_shipment.go): validate there's enough stock and that the order isn't a duplicate
+ 2. [Prepare Shipment](./activities/prepare_shipment.go): verify there is enough stock and that the order isn't a duplicate
  3. [Charge](./activities/charge.go): charge for the order
  4. [Ship](./activities/ship.go): ship the order
  
  There is an extra step added to make sure there's enough inventory after the order:
 
- 5. [Supplier Order](./activities/supplier_order.go). If the stock for the product drops below the minimum (5,000), an [order is placed with the supplier](./inventory/inventory.go) and the stock is updated.
+ 5. [Supplier Order](./activities/supplier_order.go). When the stock for the product drops below the minimum (5,000), an [order is placed with the supplier](./inventory/inventory.go) and the stock is updated.
 
-These error-prone [Activities](https://docs.temporal.io/activities) are included in a [Workflow](https://docs.temporal.io/workflows) and executed in a [Worker](https://docs.temporal.io/workers), all built with the [Temporal SDK](https://docs.temporal.io/dev-guide):
+These error-prone [Activities](https://docs.temporal.io/activities) are included in a [Workflow](https://docs.temporal.io/workflows) and executed in a [Worker](https://docs.temporal.io/workers), all built with the [Temporal SDK](https://docs.temporal.io/dev-guide).
 
 ![how_does_it_work](./resources/workflows_activities_steps.png)
 
-The activities have random errors, just like real production applications. No matter the activity errors or worker crashes, Temporal ensures your application process completes as specified in the workflow. See the [demos](./demos.md) for ways to demonstrate and validate Temporal's retry capabilities and idempotency. 
+The activities have random errors, just like real production applications. But no matter how often the activities error or workers crash, Temporal ensures your application process completes as specified in the workflow. See the [demos examples](./demos.md) for ways to demonstrate Temporal's retry capabilities and idempotency. 
 
 ![durable_execution](./resources/temporal_app_and_temporal_service.png)
 
@@ -82,7 +82,7 @@ At the end the database looks like this:
 ```
 The inventory was reduced by the order quantity of 999 and then set back up to the requested capacity.
 
-No matter the activity errors, Temporal ensures that eventually this will be the state of things.
+No matter the activity errors, Temporal ensures that eventually the process will succeed.
 
 # Getting Started
 See [Setup Instructions](./setup.md).
